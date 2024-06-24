@@ -72,6 +72,7 @@ func searchTree(dir string, paths chan<- string) error {
 func run(dir string) results {
 	// The number of worker goroutines is set to twice the number of logical CPUs available.
 	workers := 2 * runtime.GOMAXPROCS(0)
+	fmt.Println("No of workers ie total double of total local CPUs", workers)
 	paths := make(chan string)
 	pairs := make(chan pair)
 	done := make(chan bool)
