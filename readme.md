@@ -67,8 +67,26 @@ Clone the repository:
 
 To start scanning for duplicate files in a directory, use the following command:
 
-`go run duplyzer_modal.go path_to_directory` 
+`go run main.go --model=<model> --dir=<path_to_directory>` 
 
-Replace `path_to_directory` with the path of the directory you want to scan.
-### For example
-`go run iteration2.go test` 
+Replace `<model>` with the concurrency model you want to use (`sequential`, `fixedpool`, `concurrentwalks`, `limitedfs`) and `<path_to_directory>` with the path of the directory you want to scan.
+
+
+### For Example: Limited Goroutines for File System Operations
+`go run main.go --model=limitedfs --dir=./test` 
+
+Output:
+```
+Running Limited Goroutines for File System Operations
+Number of workers (double the number of logical CPUs): 8
+Found file: ./test/file1.txt
+Found file: ./test/file2.txt
+Processed file: ./test/file1.txt, Hash: abcdef1234567890
+Processed file: ./test/file2.txt, Hash: 1234567890abcdef
+...
+1234567 2
+  ./test/file1.txt
+  ./test/file2.txt
+  ```
+  
+` 
