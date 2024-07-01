@@ -1,3 +1,4 @@
+// main.go
 package main
 
 import (
@@ -6,14 +7,14 @@ import (
 	"log"
 	"os"
 
+	"duplyzer/concurrentwalks"
+	"duplyzer/fixedpool"
+	"duplyzer/limitedfs"
 	"duplyzer/sequential"
-	// Import other models as they are created
-	// "./fixedpool"
-	// "./concurrentwalks"
-	// "./limitedfs"
+	"duplyzer/shared"
 )
 
-func printResults(hashes sequential.Results) {
+func printResults(hashes shared.Results) {
 	for hash, files := range hashes {
 		if len(files) > 1 {
 			fmt.Println(hash[len(hash)-7:], len(files))
@@ -25,7 +26,7 @@ func printResults(hashes sequential.Results) {
 }
 
 func main() {
-	model := flag.String("model", "sequential", "Concurrency model to use: sequential, fixedpool, concurrentwalks, limitedfs")
+	model := flag.String("model", "fixedpool", "Concurrency model to use: sequential, fixedpool, concurrentwalks, limitedfs")
 	dir := flag.String("dir", ".", "Directory to scan for duplicate files")
 	flag.Parse()
 
@@ -33,22 +34,22 @@ func main() {
 		log.Fatal("Missing parameter, provide dir name!")
 	}
 
-	var hashes sequential.Results
+	var hashes shared.Results
 	var err error
 
 	switch *model {
-	case "sequential":
-		fmt.Println("Running Sequential Program")
-		hashes, err = sequential.SearchTreeSequential(*dir)
 	case "fixedpool":
 		fmt.Println("Running Fixed Pool of Worker Goroutines")
-		// hashes, err = fixedpool.SearchTreeFixedPool(*dir)
+		hashes = fixedpool.Run(*dir)
+	case "sequential":
+		fmt.Println("Running Sequential Program")
+		hashes = sequential.Run(*dir)
 	case "concurrentwalks":
 		fmt.Println("Running Concurrent Directory Walks")
-		// hashes, err = concurrentwalks.SearchTreeConcurrentWalks(*dir)
+		hashes = concurrentwalks.Run(*dir)
 	case "limitedfs":
 		fmt.Println("Running Limited Goroutines for File System Operations")
-		// hashes, err = limitedfs.SearchTreeLimitedFS(*dir)
+		hashes = limitedfs.Run(*dir)
 	default:
 		fmt.Println("Unknown model:", *model)
 		os.Exit(1)
