@@ -29,12 +29,38 @@
     
 -   **Performance:** This method introduces concurrency but still relies on a sequential walk to distribute work, which might still be a bottleneck if the walk itself is slow. 
 
+### 3. Concurrent Directory Walks: iteration3.go 
+
+  
+
+- **Description:** Enhances the concurrency by initiating a new file walk goroutine for each directory encountered. This spreads the hashing workload more efficiently across multiple cores.
+
+  
+
+- **Output:** Same structured output, demonstrating efficiency.
+
+- **Performance:** Expected to show noticeable performance improvements over Method 1, especially in environments with deeply nested directory structures.
+
+  
+
+### 4. Limited Goroutines for File System Operations: iteration4.go 
+
+  
+
+- **Description:** Creates a goroutine for each file and directory but limits the number of goroutines that can perform file system operations concurrently to reduce contention.
+
+  
+
+- **Output:** Continues to output duplicate hashes and file paths.
+
+- **Performance:** Likely the most sophisticated and efficient version, balancing concurrency and system resource utilization to minimize bottlenecks caused by excessive thread creation and I/O operations.
+
 ## Installation
 
 Ensure you have Go installed on your system.
 Clone the repository:
 
-`git clone https://github.com/yourusername/Duplyzer_Go.git`
+`git clone https://github.com/ravjot07/Duplyzer_Go.git`
 `cd Duplyzer_Go`
 
 ## Usage
