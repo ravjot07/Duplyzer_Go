@@ -28,7 +28,9 @@ func hashFile(path string) shared.Pair {
 
 func processFiles(paths <-chan string, pairs chan<- shared.Pair, done chan<- bool) {
 	for path := range paths {
-		pairs <- hashFile(path)
+		pair := hashFile(path)
+		fmt.Printf("Processed file: %s, Hash: %s\n", pair.Path, pair.Hash)
+		pairs <- pair
 	}
 	done <- true
 }
@@ -36,6 +38,7 @@ func processFiles(paths <-chan string, pairs chan<- shared.Pair, done chan<- boo
 func collectHashes(pairs <-chan shared.Pair, result chan<- shared.Results) {
 	hashes := make(shared.Results)
 	for p := range pairs {
+		fmt.Printf("Collecting hash: %s for file: %s\n", p.Hash, p.Path)
 		hashes[p.Hash] = append(hashes[p.Hash], p.Path)
 	}
 	result <- hashes
@@ -47,6 +50,7 @@ func searchTree(dir string, paths chan<- string) error {
 			return err
 		}
 		if fi.Mode().IsRegular() && fi.Size() > 0 {
+			fmt.Printf("Found file: %s\n", p)
 			paths <- p
 		}
 		return nil
@@ -56,7 +60,7 @@ func searchTree(dir string, paths chan<- string) error {
 
 func Run(dir string) shared.Results {
 	workers := 2 * runtime.GOMAXPROCS(0)
-	fmt.Println("No of workers ie total double of total local CPUs", workers)
+	fmt.Println("Number of workers (double the number of logical CPUs):", workers)
 	paths := make(chan string)
 	pairs := make(chan shared.Pair)
 	done := make(chan bool)

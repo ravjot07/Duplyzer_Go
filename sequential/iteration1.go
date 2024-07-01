@@ -33,6 +33,7 @@ func SearchTreeSequential(dir string) (shared.Results, error) {
 		}
 		if fi.Mode().IsRegular() && fi.Size() > 0 {
 			h := hashFile(p)
+			fmt.Printf("Processed file: %s, Hash: %s\n", h.Path, h.Hash)
 			hashes[h.Hash] = append(hashes[h.Hash], h.Path)
 		}
 		return nil
