@@ -1,4 +1,3 @@
-// main.go
 package main
 
 import (
@@ -6,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	// "runtime/pprof"
 	"time"
 
 	"duplyzer/concurrentwalks"
@@ -27,7 +28,7 @@ func printResults(hashes shared.Results) {
 }
 
 func main() {
-	start := time.Now()
+	// Parse command-line flags
 	model := flag.String("model", "fixedpool", "Concurrency model to use: sequential, fixedpool, concurrentwalks, limitedfs")
 	dir := flag.String("dir", ".", "Directory to scan for duplicate files")
 	flag.Parse()
@@ -36,9 +37,30 @@ func main() {
 		log.Fatal("Missing parameter, provide dir name!")
 	}
 
-	var hashes shared.Results
-	var err error
+	// // Create CPU profile
+	// cpuProfile, err := os.Create("cpu_profile.prof")
+	// if err != nil {
+	// 	log.Fatal("could not create CPU profile: ", err)
+	// }
+	// defer cpuProfile.Close()
 
+	// if err := pprof.StartCPUProfile(cpuProfile); err != nil {
+	// 	log.Fatal("could not start CPU profile: ", err)
+	// }
+	// defer pprof.StopCPUProfile()
+
+	// // Create memory profile
+	// memProfile, err := os.Create("mem_profile.prof")
+	// if err != nil {
+	// 	log.Fatal("could not create memory profile: ", err)
+	// }
+	// defer memProfile.Close()
+
+	// Start timing
+	start := time.Now()
+
+	// Run selected model
+	var hashes shared.Results
 	switch *model {
 	case "fixedpool":
 		fmt.Println("Running Fixed Pool of Worker Goroutines")
@@ -57,12 +79,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	printResults(hashes)
-
+	// Stop timing
 	elapsed := time.Since(start)
+
+	// Print results and performance metrics
+	printResults(hashes)
 	fmt.Printf("Execution time: %s\n", elapsed)
+
+	// // Write memory profile
+	// if err := pprof.WriteHeapProfile(memProfile); err != nil {
+	// 	log.Fatal("could not write memory profile: ", err)
+	// }
 }
