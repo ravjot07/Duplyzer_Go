@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"duplyzer/concurrentwalks"
 	"duplyzer/fixedpool"
@@ -26,6 +27,7 @@ func printResults(hashes shared.Results) {
 }
 
 func main() {
+	start := time.Now()
 	model := flag.String("model", "fixedpool", "Concurrency model to use: sequential, fixedpool, concurrentwalks, limitedfs")
 	dir := flag.String("dir", ".", "Directory to scan for duplicate files")
 	flag.Parse()
@@ -60,4 +62,7 @@ func main() {
 	}
 
 	printResults(hashes)
+
+	elapsed := time.Since(start)
+	fmt.Printf("Execution time: %s\n", elapsed)
 }
