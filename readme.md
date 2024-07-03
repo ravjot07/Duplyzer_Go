@@ -9,6 +9,7 @@
 -   **Cross-Platform Compatibility**: Runs on multiple operating systems, thanks to Go's cross-platform support.
 -   **Command-Line Interface**: Easy-to-use CLI for straightforward execution and minimal setup.
 -   **Customizable Concurrency**: Allows users to choose the best concurrency model based on their system's performance.
+- **Local file input**:Implemented volume mounting in Docker run command to allow access to local directories - Users can now specify a directory on their local machine to be scanned for duplicate files
 
 ## Concurrency Models
 
@@ -64,13 +65,36 @@ Clone the repository:
 `cd Duplyzer_Go`
 
 ## Usage
-
+### Without Docker
 To start scanning for duplicate files in a directory, use the following command:
 
 `go run main.go --model=<model> --dir=<path_to_directory>` 
 
 Replace `<model>` with the concurrency model you want to use (`sequential`, `fixedpool`, `concurrentwalks`, `limitedfs`) and `<path_to_directory>` with the path of the directory you want to scan.
+###  Using Build 
+Build Using:
 
+`go build -o duplizer-cli .`
+
+Run the CLI Tool:
+
+`./duplizer-cli --model concurrentwalks --dir /path/to/directory`
+
+
+### With Docker 
+Build the Docker Image:
+
+`docker build -t duplizer-cli .`
+
+Replace `/path/to/local/directory` with the actual path to the directory you want to scan for duplicate files.
+
+```
+docker run --rm -v "/path/to/local/directory:/app/scan-dir" duplizer-cli --model concurrentwalks --dir /app/scan-dir
+```
+Example:
+```
+docker run --rm -v "/home/ravjot/Desktop/Go Lang Projects/Duplyzer_Go/test:/app/scan-dir" duplizer-cli --model concurrentwalks --dir /app/scan-dir
+```
 
 ### For Example: Limited Goroutines for File System Operations
 `go run main.go --model=limitedfs --dir=./test` 
