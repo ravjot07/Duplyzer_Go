@@ -78,15 +78,17 @@ Replace `<model>` with the concurrency model you want to use (`sequential`, `fix
 Output:
 ```
 Running Limited Goroutines for File System Operations
-Number of workers (double the number of logical CPUs): 8
-Found file: ./test/file1.txt
-Found file: ./test/file2.txt
-Processed file: ./test/file1.txt, Hash: abcdef1234567890
-Processed file: ./test/file2.txt, Hash: 1234567890abcdef
-...
-1234567 2
-  ./test/file1.txt
-  ./test/file2.txt
+Number of workers (double the number of logical CPUs): 16
+Processed file: test/rc.txt, Hash: c1c7f5decb9ff01edf1af096ebb8f4a4
+Collecting hash: c1c7f5decb9ff01edf1af096ebb8f4a4 for file: test/rc.txt
+Processed file: test/rb.txt, Hash: 6f11ac20bf1d3c85c586fa793fa03186
+Collecting hash: 6f11ac20bf1d3c85c586fa793fa03186 for file: test/rb.txt
+Processed file: test/r1/ra.txt, Hash: 6f11ac20bf1d3c85c586fa793fa03186
+Collecting hash: 6f11ac20bf1d3c85c586fa793fa03186 for file: test/r1/ra.txt
+fa03186 2
+   test/rb.txt
+   test/r1/ra.txt
+Execution time: 503.904µs
   ```
   
-
+` 
