@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"duplyzer/concurrentwalks"
+	"duplyzer/filemanagement"
 	"duplyzer/fixedpool"
 	"duplyzer/internal/duplicate"
 	"duplyzer/limitedfs"
@@ -33,10 +34,15 @@ func main() {
 	model := flag.String("model", "fixedpool", "Concurrency model to use: sequential, fixedpool, concurrentwalks, limitedfs")
 	dir := flag.String("dir", ".", "Directory to scan for duplicate files")
 	outputFormat := flag.String("output-format", "text", "Output format: text, json, csv")
+	action := flag.String("action", "", "Action to perform on duplicates: delete, move, hard-link")
+	targetDir := flag.String("target-dir", "", "Target directory for move or hard-link actions")
 	flag.Parse()
 
 	if *dir == "" {
 		log.Fatal("Missing parameter, provide dir name!")
+	}
+	if (*action == "move" || *action == "hard-link") && *targetDir == "" {
+		log.Fatal("Target directory must be specified for move or hard-link actions")
 	}
 
 	// // Create CPU profile
@@ -83,6 +89,17 @@ func main() {
 
 	// Stop timing
 	elapsed := time.Since(start)
+
+	// Manage duplicates based on specified action
+	if *action != "" {
+		err := filemanagement.ManageDuplicates(*action, *targetDir, hashes)
+		if err != nil {
+			fmt.Printf("Error managing duplicates: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println("Duplicate file management completed successfully")
+	}
+
 	// Export results based on the chosen output format
 	outputPath := "output." + *outputFormat
 	var err error
