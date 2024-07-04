@@ -10,6 +10,7 @@
 -   **Command-Line Interface**: Easy-to-use CLI for straightforward execution and minimal setup.
 -   **Customizable Concurrency**: Allows users to choose the best concurrency model based on their system's performance.
 - **Local file input**:Implemented volume mounting in Docker run command to allow access to local directories - Users can now specify a directory on their local machine to be scanned for duplicate files
+- - **Support Report Generation**:Implemented feature to generate output of duplicate files as json or csv file.
 
 ## Concurrency Models
 
@@ -68,9 +69,10 @@ Clone the repository:
 ### Without Docker
 To start scanning for duplicate files in a directory, use the following command:
 
-`go run main.go --model=<model> --dir=<path_to_directory>` 
+`go run main.go --model=<model> --dir=<path_to_directory> --output-format=<format>` 
 
 Replace `<model>` with the concurrency model you want to use (`sequential`, `fixedpool`, `concurrentwalks`, `limitedfs`) and `<path_to_directory>` with the path of the directory you want to scan.
+Replace `<format>` with the type of report you want to generate  (`csv`, `json`)
 ###  Using Build 
 Build Using:
 
@@ -78,7 +80,7 @@ Build Using:
 
 Run the CLI Tool:
 
-`./duplizer-cli --model concurrentwalks --dir /path/to/directory`
+`./duplizer-cli --model=<model> --dir=<path_to_directory> --output-format=<format>`
 
 
 ### With Docker 
