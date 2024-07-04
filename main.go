@@ -11,6 +11,7 @@ import (
 
 	"duplyzer/concurrentwalks"
 	"duplyzer/fixedpool"
+	"duplyzer/internal/duplicate"
 	"duplyzer/limitedfs"
 	"duplyzer/sequential"
 	"duplyzer/shared"
@@ -31,6 +32,7 @@ func main() {
 	// Parse command-line flags
 	model := flag.String("model", "fixedpool", "Concurrency model to use: sequential, fixedpool, concurrentwalks, limitedfs")
 	dir := flag.String("dir", ".", "Directory to scan for duplicate files")
+	outputFormat := flag.String("output-format", "text", "Output format: text, json, csv")
 	flag.Parse()
 
 	if *dir == "" {
@@ -81,6 +83,25 @@ func main() {
 
 	// Stop timing
 	elapsed := time.Since(start)
+	// Export results based on the chosen output format
+	outputPath := "output." + *outputFormat
+	var err error
+	switch *outputFormat {
+	case "json":
+		err = duplicate.ExportToJSON(hashes, outputPath)
+	case "csv":
+		err = duplicate.ExportToCSV(hashes, outputPath)
+	default:
+		fmt.Println("Unsupported output format")
+		os.Exit(1)
+	}
+
+	if err != nil {
+		fmt.Printf("Error exporting results: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Results saved to %s\n", outputPath)
 
 	// Print results and performance metrics
 	printResults(hashes)
