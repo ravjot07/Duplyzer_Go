@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	// "runtime/pprof"
@@ -29,6 +31,32 @@ func printResults(hashes shared.Results) {
 	}
 }
 
+func generateReportJSON(hashes shared.Results) ([]byte, error) {
+	type ReportEntry struct {
+		Hash  string   `json:"hash"`
+		Files []string `json:"files"`
+	}
+	var report []ReportEntry
+	for hash, files := range hashes {
+		if len(files) > 1 {
+			report = append(report, ReportEntry{Hash: hash, Files: files})
+		}
+	}
+	return json.Marshal(report)
+}
+
+func reportHandler(hashes shared.Results) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		reportJSON, err := generateReportJSON(hashes)
+		if err != nil {
+			http.Error(w, "Unable to generate report", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(reportJSON)
+	}
+}
+
 func main() {
 	// Parse command-line flags
 	model := flag.String("model", "fixedpool", "Concurrency model to use: sequential, fixedpool, concurrentwalks, limitedfs")
@@ -36,6 +64,7 @@ func main() {
 	outputFormat := flag.String("output-format", "text", "Output format: text, json, csv")
 	action := flag.String("action", "", "Action to perform on duplicates: delete, move, hard-link")
 	targetDir := flag.String("target-dir", "", "Target directory for move or hard-link actions")
+	webReport := flag.Bool("web-report", false, "Generate a web-based report")
 	flag.Parse()
 
 	if *dir == "" {
@@ -118,14 +147,38 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Results saved to %s\n", outputPath)
+	// Export results based on the chosen output format
+	if *webReport {
+		http.HandleFunc("/report", reportHandler(hashes))
+		fmt.Println("Starting web server at http://localhost:8080")
+		log.Fatal(http.ListenAndServe(":8080", nil))
+	} else {
+		outputPath := "output." + *outputFormat
+		var err error
+		switch *outputFormat {
+		case "json":
+			err = duplicate.ExportToJSON(hashes, outputPath)
+		case "csv":
+			err = duplicate.ExportToCSV(hashes, outputPath)
+		default:
+			fmt.Println("Unsupported output format")
+			os.Exit(1)
+		}
 
-	// Print results and performance metrics
-	printResults(hashes)
-	fmt.Printf("Execution time: %s\n", elapsed)
+		if err != nil {
+			fmt.Printf("Error exporting results: %v\n", err)
+			os.Exit(1)
+		}
 
-	// // Write memory profile
-	// if err := pprof.WriteHeapProfile(memProfile); err != nil {
-	// 	log.Fatal("could not write memory profile: ", err)
-	// }
+		fmt.Printf("Results saved to %s\n", outputPath)
+
+		// Print results and performance metrics
+		printResults(hashes)
+		fmt.Printf("Execution time: %s\n", elapsed)
+
+		// // Write memory profile
+		// if err := pprof.WriteHeapProfile(memProfile); err != nil {
+		// 	log.Fatal("could not write memory profile: ", err)
+		// }
+	}
 }
