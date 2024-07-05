@@ -47,6 +47,7 @@ func generateReportJSON(hashes shared.Results) ([]byte, error) {
 
 func reportHandler(hashes shared.Results) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		reportJSON, err := generateReportJSON(hashes)
 		if err != nil {
 			http.Error(w, "Unable to generate report", http.StatusInternalServerError)
